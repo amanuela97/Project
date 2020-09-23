@@ -1,18 +1,26 @@
 package com.example.project
 
 import android.Manifest
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -55,7 +63,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(R.layout.fragment_maps, container, false)
-        // Retrieve location and camera position from saved instance state.
+        // Retrieve location and camera position from saved instance state. And add marker
         lastKnownLocation = savedInstanceState?.getParcelable(KEY_LOCATION)
         cameraPosition = savedInstanceState?.getParcelable(KEY_CAMERA_POSITION)
         return v
@@ -78,6 +86,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
         //ask for location permission
         getLocationPermission()
+
+        // if location is not turned on direct user to settings
+        if(checkIfLocationIsOn() && locationPermissionGranted){
+            activity?.supportFragmentManager?.let { LocationDialogFragment().show(it, "TAG") }
+        }
 
         // Turn on locations settings on map
         updateLocationUI()
@@ -165,6 +178,14 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun checkIfLocationIsOn(): Boolean{
+        val lm = activity?.getSystemService(AppCompatActivity.LOCATION_SERVICE) as LocationManager
+        val gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val networkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        return (!gpsEnabled && !networkEnabled)
+
+    }
+
     //called after user response to permission request
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -176,8 +197,29 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     locationPermissionGranted = true
+
                 }
             }
+        }
+    }
+
+    //dialogue to remind user to turn on  location
+    class LocationDialogFragment : DialogFragment(){
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            return activity?.let {
+                //  dialog construction
+                val builder = AlertDialog.Builder(it)
+                builder.setMessage(R.string.alert_message)
+                    .setPositiveButton("OK") { _, _ ->
+                        // request location action
+                        val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                        startActivity(intent)
+                    }
+                    .setNegativeButton("CANCEL") { _, _ ->
+                        Toast.makeText(context, getText(R.string.canceled), Toast.LENGTH_SHORT).show()
+                    }
+                builder.create()
+            } ?: throw IllegalStateException("Activity cannot be null")
         }
     }
 
