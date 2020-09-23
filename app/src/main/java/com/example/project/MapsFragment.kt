@@ -2,6 +2,7 @@ package com.example.project
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 
 class MapsFragment : Fragment(), OnMapReadyCallback {
 
@@ -123,15 +125,17 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                         // Set the map's camera position to the current location of the device.
                         lastKnownLocation = task.result
                         if (lastKnownLocation != null) {
+                            val cLocation = LatLng(lastKnownLocation!!.latitude,lastKnownLocation!!.longitude)
                             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                LatLng(lastKnownLocation!!.latitude,
-                                    lastKnownLocation!!.longitude), DEFAULT_ZOOM.toFloat()))
+                                cLocation, DEFAULT_ZOOM.toFloat()))
+                            map?.addMarker(MarkerOptions().position(cLocation).title(getAddress(cLocation.latitude, cLocation.longitude)))
                         }
                     } else {
                         Log.d(TAG, "Current location is null. Using defaults location.")
                         Log.e(TAG, "Exception: %s", task.exception)
                         map?.moveCamera(CameraUpdateFactory
                             .newLatLngZoom(defaultLocation, DEFAULT_ZOOM.toFloat()))
+                        map?.addMarker(MarkerOptions().position(defaultLocation).title(getAddress(defaultLocation.latitude,defaultLocation.longitude)))
                         map?.uiSettings?.isMyLocationButtonEnabled = false
                     }
                 }
@@ -141,6 +145,12 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    // get address name using lat and lng
+    private fun getAddress(lat: Double?, lng: Double?): String {
+        val geoCoder = Geocoder(requireActivity())
+        val list = geoCoder.getFromLocation(lat?:0.0, lng?:0.0, 1)
+        return list[0].getAddressLine(0)
+    }
 
      //Prompts the user for permission to use the device location.
     private fun getLocationPermission() {
