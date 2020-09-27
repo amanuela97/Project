@@ -3,4 +3,9 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="alert_message">This application requires locations to be turned on</string>
     <string name="canceled">Location is off</string>
+    <string name="picture_of_the_restaurant">picture of the restaurant</string>
+    <string name="opening_status">Open</string>
+    <string name="opening_status2">Closed</string>
+    <string name="directions">Directions</string>
+    <string name="loading">Loading...</string>
 </resources>
