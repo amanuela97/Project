@@ -12,7 +12,7 @@ data class Restaurant(
     val name: String,
     val icon: String,
     val business_status: String,
-    val photos: Bitmap,
+    val photos: Byte,
     val place_id: String,
     val rating: Double,
     val reference: String,
