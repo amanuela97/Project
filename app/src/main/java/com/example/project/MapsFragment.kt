@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -45,6 +46,7 @@ import com.google.android.gms.maps.model.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.*
 import com.google.android.libraries.places.api.net.*
+import com.mancj.materialsearchbar.MaterialSearchBar
 import com.mancj.materialsearchbar.adapter.SuggestionsAdapter
 import kotlinx.android.synthetic.main.fragment_maps.*
 import okhttp3.Call
@@ -53,7 +55,7 @@ import okhttp3.OkHttpClient
 import java.io.IOException
 
 
-class MapsFragment : Fragment(), OnMapReadyCallback {
+class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchActionListener {
 
     private var map: GoogleMap? = null
     private var cameraPosition: CameraPosition? = null
@@ -85,7 +87,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         viewModel = ViewModelProvider(this,viewModelFactory).get(MainViewModel::class.java)
 
         //remove action bar as well
-        (activity as AppCompatActivity?)!!.supportActionBar!!.hide()
+//        (activity as AppCompatActivity?)!!.supportActionBar!!.hide()
 
         // Retrieve location and camera position from saved instance state. And add marker
         lastKnownLocation = savedInstanceState?.getParcelable(Constants.KEY_LOCATION)
@@ -107,6 +109,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
+        setupSearchBarHamburgerIcon()
     }
 
     //called when map is ready for use
@@ -513,5 +516,23 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun setupSearchBarHamburgerIcon() {
+        searchBar.setOnSearchActionListener(this)
+    }
 
+    override fun onSearchStateChanged(enabled: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onSearchConfirmed(text: CharSequence?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onButtonClicked(buttonCode: Int) {
+        when (buttonCode) {
+            MaterialSearchBar.BUTTON_NAVIGATION -> {
+                (activity as MainActivity).toggleDrawer()
+            }
+        }
+    }
 }
