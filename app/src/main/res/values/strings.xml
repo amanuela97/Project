@@ -12,4 +12,7 @@
     <string name="drawer_close">Close</string>
     <string name="search_radius">Search Radius</string>
     <string name="favourites">Favourites</string>
+    <string name="search_radius_description">Enter your desired search radius in kilometer (maximum 20km)</string>
+    <string name="search_radius_input_placeholder">Enter desired search radius</string>
+    <string name="save_button_label">Save</string>
 </resources>

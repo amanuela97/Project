@@ -43,6 +43,14 @@
             </intent-filter>
 
         </activity>
+        <activity
+            android:name=".SearchRadiusActivity"
+            android:label="@string/search_radius"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
     </application>
 
 </manifest>
