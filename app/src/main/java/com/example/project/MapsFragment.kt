@@ -34,6 +34,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.project.model.Result
 import com.example.project.repository.Repository
+import com.example.project.room_data.RestaurantModel
 import com.example.project.utility.Constants
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -42,7 +43,10 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.*
 import com.google.android.libraries.places.api.net.*
@@ -73,6 +77,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
     //The geographical location where the device is currently located.
     private var lastKnownLocation: Location? = null
     private lateinit var viewModel: MainViewModel
+    private lateinit var restaurantModel: RestaurantModel
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
@@ -105,6 +110,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(
             requireActivity()
         )
+
+        //initialize database to store fav restaurant info
+        restaurantModel = ViewModelProvider(this).get(RestaurantModel::class.java)
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
@@ -152,21 +160,21 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                     .setSessionToken(token)
                     .setQuery(p0.toString())
                     .build()
-                    placesClient.findAutocompletePredictions(predictionsRequest).addOnCompleteListener {task ->
-                        if (task.isSuccessful){
-                            val predictionResponse = task.result
-                            if (predictionResponse != null){
-                                predictionsList = predictionResponse.autocompletePredictions
-                                val autoCompleteResults = ArrayList<String>()
-                                predictionsList.forEach {
-                                    autoCompleteResults.add(it.getFullText(null).toString())
-                                }
-                                searchBar.updateLastSuggestions(autoCompleteResults)
+                placesClient.findAutocompletePredictions(predictionsRequest).addOnCompleteListener {task ->
+                    if (task.isSuccessful){
+                        val predictionResponse = task.result
+                        if (predictionResponse != null){
+                            predictionsList = predictionResponse.autocompletePredictions
+                            val autoCompleteResults = ArrayList<String>()
+                            predictionsList.forEach {
+                                autoCompleteResults.add(it.getFullText(null).toString())
                             }
-                        }else{
-                            Log.d(Constants.TAG, "fetching predictions failed")
+                            searchBar.updateLastSuggestions(autoCompleteResults)
                         }
+                    }else{
+                        Log.d(Constants.TAG, "fetching predictions failed")
                     }
+                }
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -278,7 +286,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
 
                 val locationResult = fusedLocationProviderClient.lastLocation
                 locationResult.addOnCompleteListener(requireActivity()) { task ->
-                    if (task.isSuccessful) {
+                    if (task.isSuccessful && !checkIfLocationIsOn()) {
                         // Set the map's camera position to the current location of the device.
                         lastKnownLocation = task.result
                         if (lastKnownLocation != null) {
@@ -329,13 +337,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                         map?.uiSettings?.isMyLocationButtonEnabled = false
                     }
                     //set marker anywhere clicked on the map
-                    map?.setOnMapClickListener{
+                    /*map?.setOnMapClickListener{
                         map?.addMarker(MarkerOptions().position(it))
                         map?.moveCamera(
                             CameraUpdateFactory
                                 .newLatLngZoom(it, Constants.DEFAULT_ZOOM.toFloat())
                         )
-                    }
+                    }*/
                 }
             }
         } catch (e: SecurityException) {
@@ -380,7 +388,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
             }
             places.forEach { place ->
                 if (place.name == marker.title && marker.title != getAddress(lastKnownLocation?.latitude, lastKnownLocation?.longitude)) {
-                  setUpCard(place)
+                    setUpCard(place)
                 }
             }
             false
@@ -419,7 +427,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                     val bitmap = BitmapFactory.decodeStream(myResponse)
                     Log.i(Constants.TAG, "$bitmap")
                     requireActivity().runOnUiThread{
-                        restaurant_img.setImageBitmap(bitmap)
+                        restaurant_img.setImageBitmap(Bitmap.createScaledBitmap(bitmap,600,200,true))
                     }
                 }
             }
@@ -435,7 +443,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
             .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
                 val bitmap = fetchPhotoResponse.bitmap
                 requireActivity().runOnUiThread{
-                    restaurant_img.setImageBitmap(bitmap)
+                    restaurant_img.setImageBitmap(Bitmap.createScaledBitmap(bitmap,600,200,true))
                 }
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {
@@ -454,9 +462,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         return list[0].getAddressLine(0)
     }
 
-     //Prompts the user for permission to use the device location.
+    //Prompts the user for permission to use the device location.
     private fun getLocationPermission() {
-         // Request location permission
+        // Request location permission
         if (ContextCompat.checkSelfPermission(
                 requireActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION
