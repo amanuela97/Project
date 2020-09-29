@@ -7,5 +7,7 @@
     <string name="opening_status">Open</string>
     <string name="opening_status2">Closed</string>
     <string name="directions">Directions</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading…</string>
+    <string name="zero_results">Place not found. Check for typo</string>
+
 </resources>
