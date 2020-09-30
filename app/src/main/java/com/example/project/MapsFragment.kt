@@ -251,10 +251,17 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
 
             override fun onButtonClicked(buttonCode: Int) {
-                if (buttonCode ==   MaterialSearchBar.BUTTON_BACK){
+
+                when(buttonCode){
+                MaterialSearchBar.BUTTON_BACK ->{
                     searchBar.clearSuggestions()
                     searchBar.closeSearch()
                     searchedPlaceMarker?.remove()
+                }
+                MaterialSearchBar.BUTTON_NAVIGATION ->{
+                   // SETUP THE DRAWER IN HERE
+
+                }
                 }
             }
 
