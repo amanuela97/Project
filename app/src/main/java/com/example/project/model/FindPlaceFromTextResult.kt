@@ -1,5 +1,7 @@
 package com.example.project.model
 
+import com.google.android.libraries.places.api.model.Place
+
 data class FindPlaceFromTextResult(
     val candidates: List<Candidate>,
     val status: String
@@ -10,7 +12,7 @@ data class Candidate(
     val geometry: Geometry,
     val name: String,
     val opening_hours: OpeningHours?,
-    val photos: List<Photo>,
+    val photos: List<PlacePhoto>,
     val rating: Double
 )
 

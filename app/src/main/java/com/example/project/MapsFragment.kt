@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.project.model.Candidate
 import com.example.project.model.NearbySearchResult
 import com.example.project.repository.Repository
 import com.example.project.room_data.RestaurantModel
@@ -64,7 +65,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var cameraPosition: CameraPosition? = null
     private lateinit var placesClient: PlacesClient
     private lateinit var predictionsList: List<AutocompletePrediction>
-    private var searchedPlaces: ArrayList<Place> = ArrayList()
+    private var suggestedPlaces: ArrayList<Place> = ArrayList()
+    private var searchedPlace: Candidate? = null
     private var searchedPlaceMarker: Marker? = null
 
     //A default location (Sydney, Australia)
@@ -221,7 +223,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                            MarkerOptions().position(response.place.latLng!!)
                                .title(response.place.name)
                        )
-                        searchedPlaces.add(response.place)
+                        suggestedPlaces.add(response.place)
                     }
                 }.addOnFailureListener { ex ->
                     ex.printStackTrace()
@@ -244,10 +246,16 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             }
 
             override fun onSearchConfirmed(text: CharSequence?) {
+                searchBar.clearSuggestions()
                 if (text?.isNotEmpty()!!){ startSearch(text.toString())}
             }
 
             override fun onButtonClicked(buttonCode: Int) {
+                if (buttonCode ==   MaterialSearchBar.BUTTON_BACK){
+                    searchBar.clearSuggestions()
+                    searchBar.closeSearch()
+                    searchedPlaceMarker?.remove()
+                }
             }
 
         })
@@ -258,20 +266,14 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             searchBar.clearSuggestions()
             Log.i(Constants.TAG, "${searchedPlaceMarker?.title}")
             searchedPlaceMarker?.remove()
-            lastKnownLocation?.latitude?.let { it1 -> lastKnownLocation?.longitude?.let { it2 ->
-                LatLng(it1,
-                    it2
-                )
-            } }
-
         }
     }
 
     private fun startSearch(text: String){
         viewModel.findPlaceFromTextSearch(text,Constants.INPUT_TYPE,Constants.FIELDS,getString(R.string.google_maps_key))
-        viewModel.findPlaceFromTextResponse.observe(this,{
-            if (it != null) {
-                val response = it.candidates[0]
+        viewModel.findPlaceFromTextResponse.observe(this,{ place ->
+            if (place != null) {
+                val response = place.candidates[0]
                 val latLng = LatLng(response.geometry.location.lat, response.geometry.location.lng)
                 map?.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
@@ -283,15 +285,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                         .title(response.name)
                 )
 
-                map?.setOnMarkerClickListener { marker ->
-                    if (marker.title == searchedPlaceMarker?.title){
-
-                        setUpCard(response.name, response.formatted_address,response.rating,response.opening_hours?.open_now,response.photos[0].photo_reference)
-
-                    }
-
-                    false
-                }
+                searchedPlace = response
 
             }else{
                 Toast.makeText(requireContext(), R.string.zero_results, Toast.LENGTH_SHORT).show()
@@ -428,8 +422,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         close_card.setOnClickListener { card.visibility = View.INVISIBLE }
         map?.setOnMarkerClickListener { marker ->
             closeKeyboard()
-            if (searchedPlaces.isNotEmpty()){
-                searchedPlaces.forEach {
+            if (suggestedPlaces.isNotEmpty()){
+                suggestedPlaces.forEach {
                     if (it.name == marker.title && marker.title != getAddress(
                             lastKnownLocation?.latitude,
                             lastKnownLocation?.longitude
@@ -454,6 +448,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                     }
                 }
             }
+            if (searchedPlace != null && marker.title == searchedPlace?.name){
+                setUpCard(searchedPlace?.name,
+                    searchedPlace?.formatted_address,
+                    searchedPlace?.rating,searchedPlace?.
+                    opening_hours?.open_now, searchedPlace?.photos?.get(0)?.photo_reference
+                )
+            }
             places.forEach { place ->
                 if (place.name == marker.title && marker.title != getAddress(
                         lastKnownLocation?.latitude,
@@ -468,7 +469,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun setUpCard(name: String, address: String, rating: Double, openNow: Boolean?, photoRef: String) {
+    private fun setUpCard(name: String?, address: String?, rating: Double?, openNow: Boolean?, photoRef: String?) {
         //get photo of restaurant
         GlobalScope.launch(Dispatchers.IO){
             getRestaurantImage(photoRef)
@@ -489,7 +490,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         card.visibility = View.VISIBLE
     }
 
-    private fun getRestaurantImage(photoRef: String) {
+    private fun getRestaurantImage(photoRef: String?) {
         val client = OkHttpClient()
         val url ="https://maps.googleapis.com/maps/api/place/photo?maxwidth=1100&photoreference=$photoRef&key=AIzaSyDW5ImALwzJx8h8RX9uFi6RDM7LiYc6UuI"
         val request = okhttp3.Request.Builder().url(url).build()
