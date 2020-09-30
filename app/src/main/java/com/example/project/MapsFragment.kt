@@ -31,7 +31,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.project.model.Result
+import com.example.project.model.NearbySearchResult
 import com.example.project.repository.Repository
 import com.example.project.room_data.RestaurantModel
 import com.example.project.utility.Constants
@@ -285,10 +285,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
                 map?.setOnMarkerClickListener { marker ->
                     if (marker.title == searchedPlaceMarker?.title){
-                        response.opening_hours?.open_now?.let { it1 ->
-                            setUpCard(response.name, response.formatted_address,response.rating,
-                                it1,response.photos[0].photo_reference)
-                        }
+
+                        setUpCard(response.name, response.formatted_address,response.rating,response.opening_hours?.open_now,response.photos[0].photo_reference)
+
                     }
 
                     false
@@ -371,7 +370,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                                     R.string.google_maps_key
                                 )
                             )
-                            viewModel.nearbySearchresponse.observe(this, { response ->
+                            viewModel.nearbySearchResponse.observe(this, { response ->
                                 Log.d(Constants.TAG, "${response.results}")
                                 markNearbyPlacesOnMap(response.results)
                             })
@@ -416,7 +415,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun markNearbyPlacesOnMap(places: List<Result>){
+    private fun markNearbyPlacesOnMap(places: List<NearbySearchResult>){
         places.forEach {
             map?.addMarker(
                 MarkerOptions().position(
@@ -460,17 +459,16 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                         lastKnownLocation?.latitude,
                         lastKnownLocation?.longitude
                     )) {
-                    place.opening_hours?.open_now?.let {
-                        setUpCard(place.name,place.vicinity, place.rating,
-                            it, place.photos[0].photo_reference)
-                    }
+
+                    setUpCard(place.name,place.vicinity, place.rating,place.opening_hours?.open_now , place.photos[0].photo_reference)
+
                 }
             }
             false
         }
     }
 
-    private fun setUpCard(name: String, address: String, rating: Double, openNow: Boolean, photoRef: String) {
+    private fun setUpCard(name: String, address: String, rating: Double, openNow: Boolean?, photoRef: String) {
         //get photo of restaurant
         GlobalScope.launch(Dispatchers.IO){
             getRestaurantImage(photoRef)
@@ -478,12 +476,15 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         restaurant_name.text = name
         vicinity.text =address
         restaurant_rating.text = rating.toString()
-        if(openNow){
-            restaurant_opening_hours.text = getText(R.string.opening_status)
-            restaurant_opening_hours.setTextColor(Color.GREEN)
-        }else{
-            restaurant_opening_hours.text = getString(R.string.opening_status2)
-            restaurant_opening_hours.setTextColor(Color.RED)
+
+        if (openNow != null){
+            if(openNow){
+                restaurant_opening_hours.text = getText(R.string.opening_status)
+                restaurant_opening_hours.setTextColor(Color.GREEN)
+            }else{
+                restaurant_opening_hours.text = getString(R.string.opening_status2)
+                restaurant_opening_hours.setTextColor(Color.RED)
+            }
         }
         card.visibility = View.VISIBLE
     }
@@ -508,7 +509,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                             Bitmap.createScaledBitmap(
                                 bitmap,
                                 600,
-                                200,
+                                500,
                                 true
                             )
                         )
@@ -527,7 +528,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
                 val bitmap = fetchPhotoResponse.bitmap
                 requireActivity().runOnUiThread{
-                    restaurant_img.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 600, 200, true))
+                    restaurant_img.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 600, 500, true))
                 }
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {

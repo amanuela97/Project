@@ -2,7 +2,7 @@ package com.example.project.api
 
 
 import com.example.project.model.FindPlaceFromTextResult
-import com.example.project.model.NearbySearchResult
+import com.example.project.model.NearbySearch
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -14,7 +14,7 @@ interface GoogleApi {
         @Query("radius") radius: String,
         @Query("type") types: String,
         @Query("key") key: String
-    ): NearbySearchResult
+    ): NearbySearch
 
     @GET("place/findplacefromtext/json")
     suspend fun findPlaceFromText(
