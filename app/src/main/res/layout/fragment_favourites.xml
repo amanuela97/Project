@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context=".FavouritesFragment">
+    
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/edit_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/edit"
+        android:textSize="24sp"
+        android:theme="@style/Theme.MaterialComponents"
+        android:textColor="@color/common_google_signin_btn_text_light_pressed"
+        android:background="@drawable/rect"
+        android:layout_gravity="center"
+        app:icon="@drawable/ic_baseline_edit_24"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fav_rv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="20dp"
+        />
+
+
+
+
+
+</LinearLayout>

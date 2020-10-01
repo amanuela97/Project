@@ -32,6 +32,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.project.model.NearbySearchResult
 import com.example.project.model.PlaceDetailsResult
 import com.example.project.repository.Repository
@@ -95,7 +96,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
 
         //remove action bar as well
-//        (activity as AppCompatActivity?)!!.supportActionBar!!.hide()
+        //(activity as AppCompatActivity?)!!.supportActionBar!!.hide()
 
         // Retrieve location and camera position from saved instance state. And add marker
         lastKnownLocation = savedInstanceState?.getParcelable(Constants.KEY_LOCATION)
@@ -264,7 +265,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                     }
                     MaterialSearchBar.BUTTON_NAVIGATION -> {
                         // SETUP THE DRAWER IN HERE
-
+                        findNavController().navigate(R.id.action_mapsFragment_to_favouritesFragment)
                     }
                 }
             }
