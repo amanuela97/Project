@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">Let\'s Party</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="alert_message">This application requires locations to be turned on</string>
@@ -9,9 +9,12 @@
     <string name="directions">Directions</string>
     <string name="loading">Loading…</string>
     <string name="zero_results">Place not found. Check for typo</string>
-    <string name="loading" tools:ignore="DuplicateDefinition">Loading…</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="search_radius">Search Radius</string>
     <string name="favourites">Favourites</string>
+    <string name="address">Address: </string>
+    <string name="hours">Hours: </string>
+    <string name="phone">Phone: </string>
+    <string name="rating">Rating: </string>
 </resources>

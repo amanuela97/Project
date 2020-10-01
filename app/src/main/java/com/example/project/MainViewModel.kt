@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project.model.FindPlaceFromTextResult
 import com.example.project.model.NearbySearch
+import com.example.project.model.PlaceDetailsResult
 import com.example.project.repository.Repository
 import kotlinx.coroutines.launch
 
@@ -12,6 +13,8 @@ class MainViewModel(private val repository: Repository): ViewModel() {
 
     val nearbySearchResponse: MutableLiveData<NearbySearch> = MutableLiveData()
     val findPlaceFromTextResponse: MutableLiveData<FindPlaceFromTextResult> = MutableLiveData()
+    val placeDetailsResponse: MutableLiveData<PlaceDetailsResult> = MutableLiveData()
+    val placeDetailsResponse2: MutableLiveData<PlaceDetailsResult> = MutableLiveData()
 
     fun getNearbySearch(location: String, radius: String, types: String, key: String){
         viewModelScope.launch {
@@ -28,6 +31,20 @@ class MainViewModel(private val repository: Repository): ViewModel() {
             }else{
                 findPlaceFromTextResponse.value = null
             }
+        }
+    }
+
+    fun getPlaceDetails(place_id: String, fields: String, key: String){
+        viewModelScope.launch {
+            val response = repository.getPlaceDetails(place_id,fields,key)
+            placeDetailsResponse.value = response.result
+        }
+    }
+
+    fun getPlaceDetails2(place_id: String, fields: String, key: String){
+        viewModelScope.launch {
+            val response = repository.getPlaceDetails(place_id,fields,key)
+            placeDetailsResponse2.value = response.result
         }
     }
 

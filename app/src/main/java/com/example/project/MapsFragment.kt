@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -31,8 +32,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.project.model.Candidate
 import com.example.project.model.NearbySearchResult
+import com.example.project.model.PlaceDetailsResult
 import com.example.project.repository.Repository
 import com.example.project.room_data.RestaurantModel
 import com.example.project.utility.Constants
@@ -66,7 +67,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
     private lateinit var placesClient: PlacesClient
     private lateinit var predictionsList: List<AutocompletePrediction>
     private var suggestedPlaces: ArrayList<Place> = ArrayList()
-    private var searchedPlace: Candidate? = null
+    private var searchedPlace: PlaceDetailsResult? = null
     private var searchedPlaceMarker: Marker? = null
 
     //A default location (Sydney, Australia)
@@ -89,7 +90,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
     ): View? {
         val v = inflater.inflate(R.layout.fragment_maps, container, false)
         //  get nearby places by setting up retrofit and view model
-        val repository  = Repository()
+        val repository = Repository()
         val viewModelFactory = MainViewModelFactory(repository)
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
 
@@ -143,7 +144,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
 
     }
 
-    private fun handleRestaurantSearch(){
+    private fun handleRestaurantSearch() {
         searchBar.addTextChangeListener(object : TextWatcher {
             val token = AutocompleteSessionToken.newInstance()
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -220,10 +221,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                                 response.place.latLng, Constants.DEFAULT_ZOOM.toFloat()
                             )
                         )
-                       searchedPlaceMarker = map?.addMarker(
-                           MarkerOptions().position(response.place.latLng!!)
-                               .title(response.place.name)
-                       )
+                        searchedPlaceMarker = map?.addMarker(
+                            MarkerOptions().position(response.place.latLng!!)
+                                .title(response.place.name)
+                        )
                         suggestedPlaces.add(response.place)
                     }
                 }.addOnFailureListener { ex ->
@@ -248,21 +249,23 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
 
             override fun onSearchConfirmed(text: CharSequence?) {
                 searchBar.clearSuggestions()
-                if (text?.isNotEmpty()!!){ startSearch(text.toString())}
+                if (text?.isNotEmpty()!!) {
+                    startSearch(text.toString())
+                }
             }
 
             override fun onButtonClicked(buttonCode: Int) {
 
-                when(buttonCode){
-                MaterialSearchBar.BUTTON_BACK ->{
-                    searchBar.clearSuggestions()
-                    searchBar.closeSearch()
-                    searchedPlaceMarker?.remove()
-                }
-                MaterialSearchBar.BUTTON_NAVIGATION ->{
-                   // SETUP THE DRAWER IN HERE
+                when (buttonCode) {
+                    MaterialSearchBar.BUTTON_BACK -> {
+                        searchBar.clearSuggestions()
+                        searchBar.closeSearch()
+                        searchedPlaceMarker?.remove()
+                    }
+                    MaterialSearchBar.BUTTON_NAVIGATION -> {
+                        // SETUP THE DRAWER IN HERE
 
-                }
+                    }
                 }
             }
 
@@ -274,41 +277,49 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
             searchBar.clearSuggestions()
             Log.i(Constants.TAG, "${searchedPlaceMarker?.title}")
             searchedPlaceMarker?.remove()
+            searchedPlace = null
         }
     }
 
-    private fun startSearch(text: String){
-        viewModel.findPlaceFromTextSearch(text,Constants.INPUT_TYPE,Constants.FIELDS,getString(R.string.google_maps_key))
-        viewModel.findPlaceFromTextResponse.observe(this,{ place ->
+    private fun startSearch(text: String) {
+        viewModel.findPlaceFromTextSearch(
+            text,
+            Constants.INPUT_TYPE,
+            Constants.FIELDS,
+            getString(R.string.google_maps_key)
+        )
+        viewModel.findPlaceFromTextResponse.observe(this, { place ->
             if (place != null) {
                 val response = place.candidates[0]
-                val latLng = LatLng(response.geometry.location.lat, response.geometry.location.lng)
-                map?.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        latLng, Constants.DEFAULT_ZOOM.toFloat()
+                viewModel.getPlaceDetails2(response.place_id,Constants.FIELDS_2,getString(R.string.google_maps_key))
+                viewModel.placeDetailsResponse2.observe(this,{ placeWithDetails2 ->
+                    val latLng = LatLng(placeWithDetails2.geometry.location.lat, placeWithDetails2.geometry.location.lng)
+                    map?.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            latLng, Constants.DEFAULT_ZOOM.toFloat()
+                        )
                     )
-                )
-                searchedPlaceMarker = map?.addMarker(
-                    MarkerOptions().position(latLng)
-                        .title(response.name)
-                )
-
-                searchedPlace = response
-
-            }else{
+                    searchedPlaceMarker = map?.addMarker(
+                        MarkerOptions().position(latLng)
+                            .title(placeWithDetails2.name)
+                    )
+                    searchedPlace = placeWithDetails2
+                })
+            } else {
                 Toast.makeText(requireContext(), R.string.zero_results, Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    private fun closeKeyboard(){
+    private fun closeKeyboard() {
         //close keyboard
-        val imm = requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm =
+            requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
-    private fun directUserToLocationSettings(){
-        if(checkIfLocationIsOn() && locationPermissionGranted){
+    private fun directUserToLocationSettings() {
+        if (checkIfLocationIsOn() && locationPermissionGranted) {
             activity?.supportFragmentManager?.let { LocationDialogFragment().show(it, "TAG") }
         }
     }
@@ -366,7 +377,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                             )
 
                             // get nearby places/restaurants
-                            val position = "${lastKnownLocation!!.latitude},${lastKnownLocation!!.longitude}"
+                            val position =
+                                "${lastKnownLocation!!.latitude},${lastKnownLocation!!.longitude}"
                             viewModel.getNearbySearch(
                                 position, Constants.RADIUS_1000, Constants.TYPE, getString(
                                     R.string.google_maps_key
@@ -417,59 +429,71 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         }
     }
 
-    private fun markNearbyPlacesOnMap(places: List<NearbySearchResult>){
+    private fun markNearbyPlacesOnMap(places: List<NearbySearchResult>) {
+        val bit = BitmapFactory.decodeResource(resources, R.drawable.restaurant)
+        val bitResized = Bitmap.createScaledBitmap(bit, 120, 120, false)
         places.forEach {
             map?.addMarker(
                 MarkerOptions().position(
                     LatLng(it.geometry.location.lat, it.geometry.location.lng)
                 ).title(
                     it.name
-                )
+                ).icon(BitmapDescriptorFactory.fromBitmap(bitResized))
             )
         }
         close_card.setOnClickListener { card.visibility = View.INVISIBLE }
         map?.setOnMarkerClickListener { marker ->
             closeKeyboard()
-            if (suggestedPlaces.isNotEmpty()){
-                suggestedPlaces.forEach {
-                    if (it.name == marker.title && marker.title != getAddress(
+            if (suggestedPlaces.isNotEmpty()) {
+                suggestedPlaces.forEach {place ->
+                    if (place.name == marker.title && marker.title != getAddress(
                             lastKnownLocation?.latitude,
                             lastKnownLocation?.longitude
-                        )){
+                        )
+                    ) {
                         //get photo of restaurant
-                        it.photoMetadatas?.get(0)?.let { it1 ->
+                        place.photoMetadatas?.get(0)?.let { it1 ->
                             getRestaurantImageWithMetaData(
                                 it1
                             )
                         }
-                        restaurant_name.text = it.name
-                        vicinity.text = it.address
-                        restaurant_rating.text =  it.rating.toString()
-                        if(it.isOpen != null && it.isOpen == true){
-                            restaurant_opening_hours.text = getText(R.string.opening_status)
-                            restaurant_opening_hours.setTextColor(Color.GREEN)
-                        }else{
-                            restaurant_opening_hours.text = getString(R.string.opening_status2)
-                            restaurant_opening_hours.setTextColor(Color.RED)
-                        }
-                        card.visibility = View.VISIBLE
+
+                        setTextValues(place.name,place.address,place.rating,place.isOpen,place.phoneNumber,place.openingHours?.weekdayText)
+
                     }
                 }
             }
-            if (searchedPlace != null && marker.title == searchedPlace?.name){
-                setUpCard(searchedPlace?.name,
+            if (searchedPlace != null && marker.title == searchedPlace?.name) {
+                setUpCard(
+                    searchedPlace?.name,
                     searchedPlace?.formatted_address,
-                    searchedPlace?.rating,searchedPlace?.
-                    opening_hours?.open_now, searchedPlace?.photos?.get(0)?.photo_reference
+                    searchedPlace?.rating,
+                    searchedPlace?.opening_hours?.open_now,
+                    searchedPlace?.photos?.get(0)?.photo_reference,
+                    searchedPlace?.formatted_phone_number,
+                    searchedPlace?.opening_hours?.weekday_text
+
                 )
             }
             places.forEach { place ->
                 if (place.name == marker.title && marker.title != getAddress(
                         lastKnownLocation?.latitude,
                         lastKnownLocation?.longitude
-                    )) {
-
-                    setUpCard(place.name,place.vicinity, place.rating,place.opening_hours?.open_now , place.photos[0].photo_reference)
+                    )
+                ) {
+                    Log.i(Constants.TAG, "here")
+                    viewModel.getPlaceDetails(place.place_id,Constants.FIELDS_2,getString(R.string.google_maps_key))
+                    viewModel.placeDetailsResponse.observe(this,{placeWithDetail ->
+                        setUpCard(
+                            placeWithDetail.name,
+                            placeWithDetail.formatted_address,
+                            placeWithDetail.rating,
+                            placeWithDetail.opening_hours?.open_now,
+                            placeWithDetail.photos[0].photo_reference,
+                            placeWithDetail.formatted_phone_number,
+                            placeWithDetail.opening_hours?.weekday_text
+                        )
+                    })
 
                 }
             }
@@ -477,30 +501,61 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         }
     }
 
-    private fun setUpCard(name: String?, address: String?, rating: Double?, openNow: Boolean?, photoRef: String?) {
+    private fun setUpCard(
+        name: String?,
+        address: String?,
+        rating: Double?,
+        openNow: Boolean?,
+        photoRef: String?,
+        phoneNumber: String?,
+        businessHours: List<String>?
+    ) {
         //get photo of restaurant
-        GlobalScope.launch(Dispatchers.IO){
+        GlobalScope.launch(Dispatchers.IO) {
             getRestaurantImage(photoRef)
         }
-        restaurant_name.text = name
-        vicinity.text =address
-        restaurant_rating.text = rating.toString()
+        setTextValues(name,address,rating,openNow,phoneNumber,businessHours)
+    }
 
-        if (openNow != null){
-            if(openNow){
+    @SuppressLint("SetTextI18n")
+    private fun setTextValues(
+        name: String?,
+        address: String?,
+        rating: Double?,
+        openNow: Boolean?,
+        phoneNumber: String?,
+        businessHours: List<String>?
+    ) {
+        restaurant_name.text = name
+        vicinity.text = "${getString(R.string.address)}  $address"
+        if (openNow != null) {
+            if (openNow) {
                 restaurant_opening_hours.text = getText(R.string.opening_status)
                 restaurant_opening_hours.setTextColor(Color.GREEN)
-            }else{
+            } else {
                 restaurant_opening_hours.text = getString(R.string.opening_status2)
                 restaurant_opening_hours.setTextColor(Color.RED)
             }
+            if (businessHours?.isNotEmpty()!!){
+                val data: ArrayList<String> = arrayListOf()
+                businessHours.forEach { open_hours ->
+                    data.add(open_hours)
+                }
+                ArrayAdapter(requireContext(),android.R.layout.simple_spinner_item,data).also { adapter ->
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    weekday_text.adapter = adapter
+                }
+            }
         }
+        phone_number.text = "${getString(R.string.phone)} ${phoneNumber ?: "-"}"
+        restaurant_rating.text = "${getString(R.string.rating)} ${rating ?: "-"}"
         card.visibility = View.VISIBLE
     }
 
     private fun getRestaurantImage(photoRef: String?) {
         val client = OkHttpClient()
-        val url ="https://maps.googleapis.com/maps/api/place/photo?maxwidth=1100&photoreference=$photoRef&key=AIzaSyDW5ImALwzJx8h8RX9uFi6RDM7LiYc6UuI"
+        val url =
+            "https://maps.googleapis.com/maps/api/place/photo?maxwidth=1100&photoreference=$photoRef&key=AIzaSyDW5ImALwzJx8h8RX9uFi6RDM7LiYc6UuI"
         val request = okhttp3.Request.Builder().url(url).build()
         Log.i(Constants.TAG, url)
         client.newCall(request).enqueue(object : Callback {
@@ -536,7 +591,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         placesClient.fetchPhoto(photoRequest)
             .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
                 val bitmap = fetchPhotoResponse.bitmap
-                requireActivity().runOnUiThread{
+                requireActivity().runOnUiThread {
                     restaurant_img.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 600, 500, true))
                 }
             }.addOnFailureListener { exception: Exception ->
@@ -563,7 +618,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                 requireActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION
             )
-            == PackageManager.PERMISSION_GRANTED) {
+            == PackageManager.PERMISSION_GRANTED
+        ) {
             locationPermissionGranted = true
         } else {
             ActivityCompat.requestPermissions(
@@ -573,7 +629,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         }
     }
 
-    private fun checkIfLocationIsOn(): Boolean{
+    private fun checkIfLocationIsOn(): Boolean {
         val lm = activity?.getSystemService(AppCompatActivity.LOCATION_SERVICE) as LocationManager
         val gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
         val networkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
@@ -588,7 +644,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         grantResults: IntArray
     ) {
         locationPermissionGranted = false
-        when(requestCode){
+        when (requestCode) {
             Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     locationPermissionGranted = true
@@ -599,7 +655,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
     }
 
     //dialogue to remind user to turn on  location
-    class LocationDialogFragment : DialogFragment(){
+    class LocationDialogFragment : DialogFragment() {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             return activity?.let {
                 //  dialog construction
@@ -611,7 +667,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                         startActivity(intent)
                     }
                     .setNegativeButton("CANCEL") { _, _ ->
-                        Toast.makeText(context, getText(R.string.canceled), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, getText(R.string.canceled), Toast.LENGTH_SHORT)
+                            .show()
                     }
                 builder.create()
             } ?: throw IllegalStateException("Activity cannot be null")
@@ -623,11 +680,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
     }
 
     override fun onSearchStateChanged(enabled: Boolean) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onSearchConfirmed(text: CharSequence?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onButtonClicked(buttonCode: Int) {
