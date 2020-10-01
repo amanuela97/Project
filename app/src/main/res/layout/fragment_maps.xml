@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:elevation="2dp"
         android:visibility="invisible"
-        android:theme="@style/Theme.MaterialComponents"
+        android:theme="@style/Theme.MaterialComponents.DayNight"
         android:layout_centerHorizontal="true"
         android:layout_margin="25dp"
         android:background="@drawable/rect"
@@ -69,7 +69,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="25sp"
-                    android:background="@drawable/rect"
                     android:textAppearance="?attr/textAppearanceHeadline6"
                     />
                 <TextView
@@ -128,9 +127,9 @@
                     android:id="@+id/button_dir"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/directions"
                     android:layout_marginEnd="150dp"
-                    style="?attr/buttonStyle"
+                    app:icon="@drawable/ic_baseline_favorite_24"
+                    style="?borderlessButtonStyle"
                     />
                 <Button
                     android:id="@+id/close_card"
