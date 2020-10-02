@@ -47,21 +47,20 @@
             <!-- Media -->
             <ImageView
                 android:id="@+id/restaurant_img"
-                android:layout_width="wrap_content"
-                android:layout_height="145dp"
-                app:srcCompat="@drawable/earth"
-                android:elevation="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:background="@drawable/rect"
-                android:scaleType="fitXY"
                 android:contentDescription="@string/picture_of_the_restaurant"
-                />
+                android:elevation="2dp"
+                android:scaleType="fitXY"
+               />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:elevation="2dp"
-                android:padding="2dp">
+                android:padding="5dp">
 
                 <!-- Title, secondary and supporting text -->
                 <TextView
@@ -76,7 +75,31 @@
                     android:id="@+id/vicinity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="10dp"
+                    android:textSize="20sp"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="?android:attr/textColorSecondary"
+                    />
+                <TextView
+                    android:id="@+id/restaurant_opening_hours"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textSize="20sp"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="?android:attr/textColorSecondary"
+                    />
+                <Spinner
+                    android:id="@+id/weekday_text"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="-8dp"
+                    android:layout_height="match_parent"/>
+                <TextView
+                    android:id="@+id/phone_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:textSize="20sp"
                     android:textAppearance="?attr/textAppearanceBody2"
                     android:textColor="?android:attr/textColorSecondary"
@@ -86,17 +109,7 @@
                     android:id="@+id/restaurant_rating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:textSize="20sp"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="?android:attr/textColorSecondary"
-                    />
-
-                <TextView
-                    android:id="@+id/restaurant_opening_hours"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="10dp"
                     android:textSize="20sp"
                     android:textAppearance="?attr/textAppearanceBody2"
                     android:textColor="?android:attr/textColorSecondary"
@@ -108,15 +121,14 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
+                android:padding="5dp"
                 android:orientation="horizontal">
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_dir"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/directions"
-                    android:padding="5dp"
-                    android:layout_marginEnd="170dp"
+                    android:layout_marginEnd="150dp"
                     style="?attr/buttonStyle"
                     />
                 <Button
@@ -124,7 +136,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/ic_baseline_close_24"
-                    android:padding="5dp"
                     style="?attr/buttonStyle"
                     />
 
