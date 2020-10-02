@@ -37,6 +37,7 @@ import com.example.project.model.PlaceDetailsResult
 import com.example.project.repository.Repository
 import com.example.project.room_data.RestaurantModel
 import com.example.project.utility.Constants
+import com.example.project.utility.GlobalObject
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -60,7 +61,7 @@ import okhttp3.OkHttpClient
 import java.io.IOException
 
 
-class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchActionListener {
+class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private var map: GoogleMap? = null
     private var cameraPosition: CameraPosition? = null
@@ -119,8 +120,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
-
-        setupSearchBarHamburgerIcon()
     }
 
     //called when map is ready for use
@@ -263,8 +262,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                         searchedPlaceMarker?.remove()
                     }
                     MaterialSearchBar.BUTTON_NAVIGATION -> {
-                        // SETUP THE DRAWER IN HERE
-
+                        (activity as MainActivity).toggleDrawer()
                     }
                 }
             }
@@ -380,7 +378,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                             val position =
                                 "${lastKnownLocation!!.latitude},${lastKnownLocation!!.longitude}"
                             viewModel.getNearbySearch(
-                                position, Constants.RADIUS_1000, Constants.TYPE, getString(
+                                position, "${GlobalObject.SEARCH_RADIUS}", Constants.TYPE, getString(
                                     R.string.google_maps_key
                                 )
                             )
@@ -672,26 +670,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                     }
                 builder.create()
             } ?: throw IllegalStateException("Activity cannot be null")
-        }
-    }
-
-    private fun setupSearchBarHamburgerIcon() {
-        searchBar.setOnSearchActionListener(this)
-    }
-
-    override fun onSearchStateChanged(enabled: Boolean) {
-
-    }
-
-    override fun onSearchConfirmed(text: CharSequence?) {
-
-    }
-
-    override fun onButtonClicked(buttonCode: Int) {
-        when (buttonCode) {
-            MaterialSearchBar.BUTTON_NAVIGATION -> {
-                (activity as MainActivity).toggleDrawer()
-            }
         }
     }
 }

@@ -16,7 +16,6 @@ class Constants {
         const val KEY_LOCATION = "location"
 
         //radius up to 50000 max
-        const val RADIUS_1000 = "1000"
         const val TYPE = "restaurant"
     }
 }

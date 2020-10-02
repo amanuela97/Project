@@ -1,5 +1,6 @@
 package com.example.project
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,20 +10,22 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.preference.PreferenceManager
+import com.example.project.utility.GlobalObject
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     companion object {
         val SEARCH_RADIUS_INTENT = "searchRadius"
     }
-    lateinit var toggle: ActionBarDrawerToggle
+    private lateinit var toggle: ActionBarDrawerToggle
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         //action bar for fragments
 //        setupActionBarWithNavController( findNavController(R.id.fragment))
-
+        setUpSharedPreferences()
         setUpDrawer()
 
 //        supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -50,6 +53,12 @@ class MainActivity : AppCompatActivity() {
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun setUpSharedPreferences() {
+        val sharedPreferences = getPreferences(Context.MODE_PRIVATE) ?: return
+        val searchRadius = sharedPreferences.getInt(getString(R.string.search_radius), resources.getInteger(R.integer.default_search_radius))
+        GlobalObject.SEARCH_RADIUS = searchRadius
     }
 
     private fun setUpDrawer() {
