@@ -356,7 +356,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     }
 
     //get recent location of the device
-    private fun getDeviceLocation() {
+    fun getDeviceLocation() {
         try {
             if (locationPermissionGranted) {
                 //set up user location marker icon
@@ -487,7 +487,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                             placeWithDetail.formatted_address,
                             placeWithDetail.rating,
                             placeWithDetail.opening_hours?.open_now,
-                            placeWithDetail.photos[0].photo_reference,
+                            placeWithDetail.photos?.get(0)?.photo_reference,
                             placeWithDetail.formatted_phone_number,
                             placeWithDetail.opening_hours?.weekday_text
                         )

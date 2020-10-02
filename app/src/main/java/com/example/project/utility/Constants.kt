@@ -15,7 +15,8 @@ class Constants {
         const val KEY_CAMERA_POSITION = "camera_position"
         const val KEY_LOCATION = "location"
 
-        //radius up to 50000 max
         const val TYPE = "restaurant"
+
+        const val SEARCH_RADIUS_KEY = "searchRadius"
     }
 }

@@ -11,12 +11,14 @@ import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.preference.PreferenceManager
+import com.example.project.utility.Constants
 import com.example.project.utility.GlobalObject
+import com.google.android.gms.maps.MapFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     companion object {
-        val SEARCH_RADIUS_INTENT = "searchRadius"
+        const val SEARCH_RADIUS_INTENT = 0
     }
     private lateinit var toggle: ActionBarDrawerToggle
 
@@ -31,7 +33,6 @@ class MainActivity : AppCompatActivity() {
 //        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         nav_view.setNavigationItemSelectedListener {
-            println(it)
             when (it.itemId) {
                 R.id.search_radius -> {
                     navigateToSearchRadiusActivity()
@@ -57,7 +58,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpSharedPreferences() {
         val sharedPreferences = getPreferences(Context.MODE_PRIVATE) ?: return
-        val searchRadius = sharedPreferences.getInt(getString(R.string.search_radius), resources.getInteger(R.integer.default_search_radius))
+        val searchRadius = sharedPreferences.getInt(Constants.SEARCH_RADIUS_KEY, resources.getInteger(R.integer.default_search_radius))
+        println(sharedPreferences.all)
         GlobalObject.SEARCH_RADIUS = searchRadius
     }
 
@@ -77,6 +79,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigateToSearchRadiusActivity() {
         val intent = Intent(this, SearchRadiusActivity::class.java)
-        startActivity(intent);
+        startActivityForResult(intent, SEARCH_RADIUS_INTENT);
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == SEARCH_RADIUS_INTENT) {
+            val fragmentManager = supportFragmentManager
+            val navHostFragment = fragmentManager.findFragmentById(R.id.fragment)
+            val mapFragment = navHostFragment?.childFragmentManager?.fragments?.get(0) as MapsFragment
+            mapFragment?.let {
+                it.getDeviceLocation()
+            }
+        }
     }
 }

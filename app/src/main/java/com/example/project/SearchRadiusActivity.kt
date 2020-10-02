@@ -1,10 +1,13 @@
 package com.example.project
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
+import com.example.project.utility.Constants
 import com.example.project.utility.GlobalObject
+import com.google.android.gms.maps.MapFragment
 import kotlinx.android.synthetic.main.activity_search_radius.*
 
 class SearchRadiusActivity : AppCompatActivity() {
@@ -12,7 +15,20 @@ class SearchRadiusActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search_radius)
 
+        setUpTextInput()
+        setUpSaveButton()
+    }
+
+    private fun setUpTextInput() {
         setUpDefaultValueOfTextInput()
+        setUpTextChangedListener()
+    }
+
+    private fun setUpDefaultValueOfTextInput() {
+        search_radius_input.setText((GlobalObject.SEARCH_RADIUS / 1000).toString())
+    }
+
+    private fun setUpTextChangedListener() {
         search_radius_input.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
@@ -35,7 +51,20 @@ class SearchRadiusActivity : AppCompatActivity() {
         })
     }
 
-    private fun setUpDefaultValueOfTextInput() {
-        search_radius_input.setText((GlobalObject.SEARCH_RADIUS / 1000).toString())
+    private fun setUpSaveButton() {
+        button.setOnClickListener {
+            val searchRadius = search_radius_input.text.toString().toInt() * 1000
+            GlobalObject.SEARCH_RADIUS = searchRadius
+            val sharedPreferences = getPreferences(Context.MODE_PRIVATE) ?: null
+            sharedPreferences?.let {
+                with(it.edit()) {
+                    putInt(Constants.SEARCH_RADIUS_KEY, searchRadius)
+                    commit()
+                    println(it.all)
+                }
+            }
+
+            finish()
+        }
     }
 }
