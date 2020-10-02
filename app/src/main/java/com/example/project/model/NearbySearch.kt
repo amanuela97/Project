@@ -3,16 +3,16 @@ package com.example.project.model
 data class NearbySearch(
     val html_attributions: List<Any>,
     val next_page_token: String,
-    val results: List<Result>,
+    val results: List<NearbySearchResult>,
     val status: String
 )
 
-data class Result(
+data class NearbySearchResult(
     val business_status: String,
     val geometry: Geometry,
     val icon: String,
     val name: String,
-    val opening_hours: OpeningHours,
+    val opening_hours: OpeningHours?,
     val photos: List<Photo>,
     val place_id: String,
     val plus_code: PlusCode,
