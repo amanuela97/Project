@@ -16,7 +16,5 @@ class Constants {
         const val KEY_LOCATION = "location"
 
         const val TYPE = "restaurant"
-
-        const val SEARCH_RADIUS_KEY = "searchRadius"
     }
 }

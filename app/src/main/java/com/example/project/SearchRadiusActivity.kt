@@ -38,6 +38,7 @@ class SearchRadiusActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(p0: Editable?) {
+                if (p0?.toString() == "") return
                 search_radius_input.removeTextChangedListener(this)
                 p0?.toString()?.toInt()?.let {
                     val maxSearchRadius = resources.getInteger(R.integer.max_search_radius) / 1000
@@ -53,14 +54,14 @@ class SearchRadiusActivity : AppCompatActivity() {
 
     private fun setUpSaveButton() {
         button.setOnClickListener {
-            val searchRadius = search_radius_input.text.toString().toInt() * 1000
-            GlobalObject.SEARCH_RADIUS = searchRadius
-            val sharedPreferences = getPreferences(Context.MODE_PRIVATE) ?: null
-            sharedPreferences?.let {
-                with(it.edit()) {
-                    putInt(Constants.SEARCH_RADIUS_KEY, searchRadius)
+            val stringValueOfInput = search_radius_input.text.toString()
+            if (stringValueOfInput != "") {
+                val searchRadius = search_radius_input.text.toString().toInt() * 1000
+                GlobalObject.SEARCH_RADIUS = searchRadius
+                val sharedPreferences = getSharedPreferences(getString(R.string.app_settings_key), Context.MODE_PRIVATE)
+                with(sharedPreferences.edit()) {
+                    putInt(getString(R.string.search_radius_key), searchRadius)
                     commit()
-                    println(it.all)
                 }
             }
 

@@ -57,9 +57,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpSharedPreferences() {
-        val sharedPreferences = getPreferences(Context.MODE_PRIVATE) ?: return
-        val searchRadius = sharedPreferences.getInt(Constants.SEARCH_RADIUS_KEY, resources.getInteger(R.integer.default_search_radius))
-        println(sharedPreferences.all)
+        val sharedPreferences = getSharedPreferences(resources.getString(R.string.app_settings_key), Context.MODE_PRIVATE) ?: return
+        val searchRadius = sharedPreferences.getInt(resources.getString(R.string.search_radius_key), resources.getInteger(R.integer.default_search_radius))
         GlobalObject.SEARCH_RADIUS = searchRadius
     }
 
