@@ -27,4 +27,6 @@
     <string name="delete">Deleted Successfully</string>
     <string name="image_of_a_heart">image of a heart</string>
     <string name="no_favourites_yet">No FAVOURITES YET!</string>
+    <string name="search_radius_key">searchRadius</string>
+    <string name="app_settings_key">settings</string>
 </resources>

@@ -38,6 +38,7 @@ import com.example.project.repository.Repository
 import com.example.project.room_data.Restaurant
 import com.example.project.room_data.RestaurantModel
 import com.example.project.utility.Constants
+import com.example.project.utility.GlobalObject
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -141,7 +142,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation()
-
         // search and autocomplete implementation
         handleRestaurantSearch()
 
@@ -149,7 +149,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
     }
 
     private fun handleFavoritesButtonClick(){
-
     }
 
     private fun handleRestaurantSearch() {
@@ -270,6 +269,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                         searchBar.closeSearch()
                         searchedPlaceMarker?.remove()
                     }
+                    MaterialSearchBar.BUTTON_NAVIGATION -> {
+                        (activity as MainActivity).toggleDrawer()
+                    }
                 }
             }
 
@@ -369,7 +371,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
     }
 
     //get recent location of the device
-    private fun getDeviceLocation() {
+    fun getDeviceLocation() {
         try {
             if (locationPermissionGranted) {
                 //set up user location marker icon
@@ -391,7 +393,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                             val position =
                                 "${lastKnownLocation!!.latitude},${lastKnownLocation!!.longitude}"
                             viewModel.getNearbySearch(
-                                position, Constants.RADIUS_1000, Constants.TYPE, getString(
+                                position, "${GlobalObject.SEARCH_RADIUS}", Constants.TYPE, getString(
                                     R.string.google_maps_key
                                 )
                             )
@@ -462,19 +464,18 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                             lastKnownLocation?.longitude
                         )
                     ) {
-                        //get photo of restaurant and set Text
+                        //get photo of restaurant
                         place.photoMetadatas?.get(0)?.let { photo ->
-                          getRestaurantImageWithMetaData(photo,
-                              place.name,
-                              place.address,
-                              place.rating,
-                              place.isOpen,
-                              place.phoneNumber,
-                              place.openingHours?.weekdayText,
-                              place.latLng
-                          )
+                            getRestaurantImageWithMetaData(photo,
+                                place.name,
+                                place.address,
+                                place.rating,
+                                place.isOpen,
+                                place.phoneNumber,
+                                place.openingHours?.weekdayText,
+                                place.latLng
+                            )
                         }
-
                     }
                 }
             }
@@ -515,7 +516,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                             placeWithDetail.formatted_address,
                             placeWithDetail.rating,
                             placeWithDetail.opening_hours?.open_now,
-                            placeWithDetail.photos[0].photo_reference,
+                            placeWithDetail.photos?.get(0)?.photo_reference,
                             placeWithDetail.formatted_phone_number,
                             placeWithDetail.opening_hours?.weekday_text,
                             LatLng(
@@ -554,7 +555,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         phoneNumber: String?,
         businessHours: List<String>?,
         img: Bitmap?,
-        location: LatLng?,
+        location: LatLng?
     ) {
         restaurant_name.text = name
         vicinity.text = "${getString(R.string.address)}  $address"

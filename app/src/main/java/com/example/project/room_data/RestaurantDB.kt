@@ -12,7 +12,6 @@ abstract class RestaurantDB: RoomDatabase(){
 
     abstract fun restaurantDao(): RestaurantDao
 
-
     companion object{
         private var INSTANCE: RestaurantDB? = null
 
