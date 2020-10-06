@@ -2,9 +2,8 @@
 
 ---
 
-<img src="ScreenShots/Screenshot_1602014842.png" width="200" title="Main Screen">
-<img src="ScreenShots/Screenshot_1602014960.png" width="200" title="Drawer">
-<img src="ScreenShots/Screenshot_1602014974.png" width="200" title="Search Radius Activity">
+<img src="ScreenShots/Screenshot_1602014842.png" width="200" title="Main Screen">  <img src="ScreenShots/Screenshot_1602014960.png" width="200" title="Drawer">  <img src="ScreenShots/Screenshot_1602014974.png" width="200" title="Search Radius Activity">
+
 ---
 
 # Description
@@ -27,9 +26,7 @@ v1.0
 
 The app uses the following services:
 
-- Google Maps API.
-- Facebook developer API
-- Twitter developer API
+- Google Maps API
 
 # Team
 
