@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/search_radius"
+        android:icon="@drawable/radius"
+        android:title="@string/search_radius" />
+    <item
+        android:id="@+id/favourites"
+        android:icon="@drawable/star"
+        android:title="@string/favourites" />
+</menu>
