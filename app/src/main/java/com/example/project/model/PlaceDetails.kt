@@ -12,7 +12,7 @@ data class PlaceDetailsResult(
     val geometry: PlaceGeometry,
     val name: String,
     val opening_hours: PlaceOpeningHours?,
-    val photos: List<PlacePhoto>,
+    val photos: List<PlacePhoto>?,
     val rating: Double
 )
 

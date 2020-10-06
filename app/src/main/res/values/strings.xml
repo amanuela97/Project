@@ -20,4 +20,6 @@
     <string name="hours">Hours: </string>
     <string name="phone">Phone: </string>
     <string name="rating">Rating: </string>
+    <string name="search_radius_key">searchRadius</string>
+    <string name="app_settings_key">settings</string>
 </resources>
