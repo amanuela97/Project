@@ -29,14 +29,17 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.project.model.NearbySearchResult
 import com.example.project.model.PlaceDetailsResult
 import com.example.project.repository.Repository
+import com.example.project.room_data.Restaurant
 import com.example.project.room_data.RestaurantModel
 import com.example.project.utility.Constants
+import com.example.project.utility.GlobalObject
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -57,6 +60,7 @@ import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 
@@ -95,7 +99,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
 
         //remove action bar as well
-//        (activity as AppCompatActivity?)!!.supportActionBar!!.hide()
+        //(activity as AppCompatActivity?)!!.supportActionBar!!.hide()
 
         // Retrieve location and camera position from saved instance state. And add marker
         lastKnownLocation = savedInstanceState?.getParcelable(Constants.KEY_LOCATION)
@@ -139,9 +143,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation()
-
+        // search and autocomplete implementation
         handleRestaurantSearch()
 
+        handleFavoritesButtonClick()
+    }
+
+    private fun handleFavoritesButtonClick(){
     }
 
     private fun handleRestaurantSearch() {
@@ -263,8 +271,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                         searchedPlaceMarker?.remove()
                     }
                     MaterialSearchBar.BUTTON_NAVIGATION -> {
-                        // SETUP THE DRAWER IN HERE
-
+                        (activity as MainActivity).toggleDrawer()
                     }
                 }
             }
@@ -291,9 +298,16 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         viewModel.findPlaceFromTextResponse.observe(this, { place ->
             if (place != null) {
                 val response = place.candidates[0]
-                viewModel.getPlaceDetails2(response.place_id,Constants.FIELDS_2,getString(R.string.google_maps_key))
-                viewModel.placeDetailsResponse2.observe(this,{ placeWithDetails2 ->
-                    val latLng = LatLng(placeWithDetails2.geometry.location.lat, placeWithDetails2.geometry.location.lng)
+                viewModel.getPlaceDetails2(
+                    response.place_id,
+                    Constants.FIELDS_2,
+                    getString(R.string.google_maps_key)
+                )
+                viewModel.placeDetailsResponse2.observe(this, { placeWithDetails2 ->
+                    val latLng = LatLng(
+                        placeWithDetails2.geometry.location.lat,
+                        placeWithDetails2.geometry.location.lng
+                    )
                     map?.moveCamera(
                         CameraUpdateFactory.newLatLngZoom(
                             latLng, Constants.DEFAULT_ZOOM.toFloat()
@@ -358,7 +372,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
     }
 
     //get recent location of the device
-    private fun getDeviceLocation() {
+    fun getDeviceLocation() {
         try {
             if (locationPermissionGranted) {
                 //set up user location marker icon
@@ -380,7 +394,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                             val position =
                                 "${lastKnownLocation!!.latitude},${lastKnownLocation!!.longitude}"
                             viewModel.getNearbySearch(
-                                position, Constants.RADIUS_1000, Constants.TYPE, getString(
+                                position, "${GlobalObject.SEARCH_RADIUS}", Constants.TYPE, getString(
                                     R.string.google_maps_key
                                 )
                             )
@@ -445,25 +459,34 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         map?.setOnMarkerClickListener { marker ->
             closeKeyboard()
             if (suggestedPlaces.isNotEmpty()) {
-                suggestedPlaces.forEach {place ->
+                suggestedPlaces.forEach { place ->
                     if (place.name == marker.title && marker.title != getAddress(
                             lastKnownLocation?.latitude,
                             lastKnownLocation?.longitude
                         )
                     ) {
                         //get photo of restaurant
-                        place.photoMetadatas?.get(0)?.let { it1 ->
-                            getRestaurantImageWithMetaData(
-                                it1
+                        place.photoMetadatas?.get(0)?.let { photo ->
+                            getRestaurantImageWithMetaData(photo,
+                                place.name,
+                                place.address,
+                                place.rating,
+                                place.isOpen,
+                                place.phoneNumber,
+                                place.openingHours?.weekdayText
                             )
                         }
-
-                        setTextValues(place.name,place.address,place.rating,place.isOpen,place.phoneNumber,place.openingHours?.weekdayText)
-
                     }
                 }
             }
             if (searchedPlace != null && marker.title == searchedPlace?.name) {
+                var location: LatLng? = null
+                if(searchedPlace?.geometry?.location != null) {
+                    location = LatLng(
+                        searchedPlace!!.geometry.location.lat,
+                        searchedPlace!!.geometry.location.lng
+                    )
+                }
                 setUpCard(
                     searchedPlace?.name,
                     searchedPlace?.formatted_address,
@@ -471,27 +494,33 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                     searchedPlace?.opening_hours?.open_now,
                     searchedPlace?.photos?.get(0)?.photo_reference,
                     searchedPlace?.formatted_phone_number,
-                    searchedPlace?.opening_hours?.weekday_text
-
+                    searchedPlace?.opening_hours?.weekday_text,
+                    location
                 )
             }
             places.forEach { place ->
-                if (place.name == marker.title && marker.title != getAddress(
-                        lastKnownLocation?.latitude,
-                        lastKnownLocation?.longitude
-                    )
+                if (
+                    place.geometry.location.lng == marker.position.longitude && place.geometry.location.lat == marker.position.latitude
                 ) {
                     Log.i(Constants.TAG, "here")
-                    viewModel.getPlaceDetails(place.place_id,Constants.FIELDS_2,getString(R.string.google_maps_key))
-                    viewModel.placeDetailsResponse.observe(this,{placeWithDetail ->
+                    viewModel.getPlaceDetails(
+                        place.place_id,
+                        Constants.FIELDS_2,
+                        getString(R.string.google_maps_key)
+                    )
+                    viewModel.placeDetailsResponse.observe(this, { placeWithDetail ->
                         setUpCard(
                             placeWithDetail.name,
                             placeWithDetail.formatted_address,
                             placeWithDetail.rating,
                             placeWithDetail.opening_hours?.open_now,
-                            placeWithDetail.photos[0].photo_reference,
+                            placeWithDetail.photos?.get(0)?.photo_reference,
                             placeWithDetail.formatted_phone_number,
-                            placeWithDetail.opening_hours?.weekday_text
+                            placeWithDetail.opening_hours?.weekday_text,
+                            LatLng(
+                                placeWithDetail.geometry.location.lat,
+                                placeWithDetail.geometry.location.lng
+                            ),
                         )
                     })
 
@@ -508,13 +537,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         openNow: Boolean?,
         photoRef: String?,
         phoneNumber: String?,
-        businessHours: List<String>?
+        businessHours: List<String>?,
+        location: LatLng?
     ) {
-        //get photo of restaurant
-        GlobalScope.launch(Dispatchers.IO) {
-            getRestaurantImage(photoRef)
-        }
-        setTextValues(name,address,rating,openNow,phoneNumber,businessHours)
+        //get photo of restaurant and setText
+        getRestaurantImage(photoRef)
+        setTextValues(name, address, rating, openNow, phoneNumber, businessHours)
+        setUpFavoriteButton(name, businessHours, openNow, rating, phoneNumber, address, location)
     }
 
     @SuppressLint("SetTextI18n")
@@ -541,7 +570,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                 businessHours.forEach { open_hours ->
                     data.add(open_hours)
                 }
-                ArrayAdapter(requireContext(),android.R.layout.simple_spinner_item,data).also { adapter ->
+                ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, data).also { adapter ->
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     weekday_text.adapter = adapter
                 }
@@ -552,7 +581,12 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         card.visibility = View.VISIBLE
     }
 
-    private fun getRestaurantImage(photoRef: String?) {
+    private fun getRestaurantImage(photoRef: String?)  {
+        if (photoRef == null) {
+            restaurant_img.setImageDrawable(null)
+            return
+        }
+        var img: Bitmap?
         val client = OkHttpClient()
         val url =
             "https://maps.googleapis.com/maps/api/place/photo?maxwidth=1100&photoreference=$photoRef&key=AIzaSyDW5ImALwzJx8h8RX9uFi6RDM7LiYc6UuI"
@@ -567,24 +601,57 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                 if (response.isSuccessful) {
                     val myResponse = response.body?.byteStream()
                     val bitmap = BitmapFactory.decodeStream(myResponse)
+                    img = Bitmap.createScaledBitmap(
+                        bitmap,
+                        600,
+                        500,
+                        true
+                    )
                     Log.i(Constants.TAG, "$bitmap")
                     requireActivity().runOnUiThread {
-                        restaurant_img.setImageBitmap(
-                            Bitmap.createScaledBitmap(
-                                bitmap,
-                                600,
-                                500,
-                                true
-                            )
-                        )
+                        restaurant_img.setImageBitmap(img)
                     }
                 }
             }
         })
     }
 
-    private fun getRestaurantImageWithMetaData(photoMetadata: PhotoMetadata) {
+    private fun setUpFavoriteButton(name: String?, businessHours: List<String>?, openNow: Boolean?, rating: Double?, phoneNumber: String?, address: String?, location: LatLng?) {
+        button_fav.setOnClickListener {
+            button_fav.text = getString(R.string.add_to_favorites)
+            //convert bitmap to byteArray to store in DB
+            val stream = ByteArrayOutputStream()
+            val img = restaurant_img.drawable.toBitmap()
+            img?.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val byteArray = stream.toByteArray()
+            Log.i(Constants.TAG, "$img lll ")
+            val restaurant =  Restaurant(0,
+                name,
+                businessHours,
+                byteArray,
+                openNow,
+                rating,
+                phoneNumber,
+                address,
+                com.example.project.room_data.Location(location?.latitude, location?.longitude),
+            )
+            GlobalScope.launch(Dispatchers.IO){
+                restaurantModel.addFavRestaurant(restaurant)
+            }
+        }
+    }
+
+    private fun getRestaurantImageWithMetaData(
+        photoMetadata: PhotoMetadata,
+        name: String?,
+        address: String?,
+        rating: Double?,
+        open: Boolean?,
+        phoneNumber: String?,
+        weekdayText: MutableList<String>?
+    ){
         // Create a FetchPhotoRequest.
+        var img: Bitmap?
         val photoRequest = FetchPhotoRequest.builder(photoMetadata)
             .setMaxWidth(1200)
             .build()
@@ -592,7 +659,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
             .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
                 val bitmap = fetchPhotoResponse.bitmap
                 requireActivity().runOnUiThread {
-                    restaurant_img.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 600, 500, true))
+                    img = Bitmap.createScaledBitmap(bitmap, 600, 500, true)
+                    restaurant_img.setImageBitmap(img)
+                    setTextValues(name, address, rating, open, phoneNumber, weekdayText)
                 }
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {
@@ -690,7 +759,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
     override fun onButtonClicked(buttonCode: Int) {
         when (buttonCode) {
             MaterialSearchBar.BUTTON_NAVIGATION -> {
-                (activity as MainActivity).toggleDrawer()
+
             }
         }
     }
