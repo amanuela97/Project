@@ -21,12 +21,23 @@ v1.0
 - Showing detail information (name, address, opening time, etc.) of selected restaurants 
 - Allow adjusting searching radius
 - Allow save restaurants as favourites
+- GPS, Humidity sensor
+- Maps fragment
+- Room DB/SharedPreference
+- Google Map
+- Retrofit
+- ViewModel, LiveData
+- OkHttp
+- Activities
 
 # Dependencies
 
 The app uses the following services:
 
 - Google Maps API
+- Google Places Api
+- OpenWeatherMap Api
+- Material Design/Components
 
 # Team
 
