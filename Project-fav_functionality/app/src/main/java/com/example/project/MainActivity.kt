@@ -38,6 +38,10 @@ class MainActivity : AppCompatActivity() {
                     navigateToFavouritesActivity()
                     true
                 }
+                R.id.weather -> {
+                    navigateToWeatherActivity()
+                    true
+                }
                 else -> false
             }
         }
@@ -83,6 +87,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigateToFavouritesActivity() {
         val intent = Intent(this, FavouritesActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun navigateToWeatherActivity() {
+        val intent = Intent(this, WeatherActivity::class.java)
         startActivity(intent)
     }
 

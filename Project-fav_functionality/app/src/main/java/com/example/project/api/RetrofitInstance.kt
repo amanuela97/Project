@@ -14,7 +14,21 @@ object RetrofitInstance {
 
     }
 
+    private val retrofit2 by lazy {
+        Retrofit.Builder()
+            .baseUrl(Constants.OPEN_WEATHER_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+    }
+
     val api: GoogleApi by lazy {
         retrofit.create(GoogleApi::class.java)
     }
+
+    val api2: WeatherAPI by lazy {
+        retrofit2.create(WeatherAPI::class.java)
+    }
+
+
 }

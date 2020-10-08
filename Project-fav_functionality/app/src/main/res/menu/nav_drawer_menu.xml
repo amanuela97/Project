@@ -9,4 +9,9 @@
         android:id="@+id/favourites"
         android:icon="@drawable/star"
         android:title="@string/favourites" />
+
+    <item
+        android:id="@+id/weather"
+        android:icon="@drawable/rain"
+        android:title="@string/weather" />
 </menu>

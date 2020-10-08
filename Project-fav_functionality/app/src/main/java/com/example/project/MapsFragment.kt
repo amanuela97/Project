@@ -380,6 +380,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                     if (task.isSuccessful && !checkIfLocationIsOn()) {
                         // Set the map's camera position to the current location of the device.
                         lastKnownLocation = task.result
+                        Constants.Location = LatLng(task.result.latitude, task.result.longitude)
                         if (lastKnownLocation != null) {
                             val cLocation = LatLng(
                                 lastKnownLocation!!.latitude,
@@ -418,6 +419,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                     } else {
                         Log.d(Constants.TAG, "Current location is null. Using defaults location.")
                         Log.e(Constants.TAG, "Exception: %s", task.exception)
+                        Constants.Location = defaultLocation
                         map?.moveCamera(
                             CameraUpdateFactory
                                 .newLatLngZoom(defaultLocation, Constants.DEFAULT_ZOOM.toFloat())
@@ -433,6 +435,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                         map?.uiSettings?.isMyLocationButtonEnabled = false
                     }
                 }
+            }else{
+                Constants.Location = defaultLocation
             }
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message, e)

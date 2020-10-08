@@ -29,4 +29,14 @@
     <string name="no_favourites_yet">No FAVOURITES YET!</string>
     <string name="search_radius_key">searchRadius</string>
     <string name="app_settings_key">settings</string>
+    <string name="temp">temp</string>
+    <string name="pressure">Pressure: </string>
+    <string name="name">name</string>
+    <string name="description">description</string>
+    <string name="date">date</string>
+    <string name="icon">icon</string>
+    <string name="weather_icon">weather icon</string>
+    <string name="country">country</string>
+    <string name="weather">Weather</string>
+    <string name="humidity">Humidity: </string>
 </resources>

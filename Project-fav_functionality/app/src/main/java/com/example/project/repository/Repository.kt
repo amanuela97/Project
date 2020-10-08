@@ -14,4 +14,7 @@ class Repository {
 
     suspend fun getPlaceDetails2(place_id: String, fields: String, key: String) =
         RetrofitInstance.api.getPlaceDetails2(place_id,fields,key)
+
+    suspend fun  getWeather(lat: Double, lon: Double, units: String?, appid: String?) =
+        RetrofitInstance.api2.getWeather(lat,lon,units,appid)
 }

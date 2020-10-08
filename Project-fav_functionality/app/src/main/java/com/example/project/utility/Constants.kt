@@ -1,5 +1,8 @@
 package com.example.project.utility
 
+import android.location.Location
+import com.google.android.gms.maps.model.LatLng
+
 class Constants {
     companion object{
         const val GOOGLE_BASE_URL = "https://maps.googleapis.com/maps/api/"
@@ -16,5 +19,9 @@ class Constants {
         const val KEY_LOCATION = "location"
 
         const val TYPE = "restaurant"
+        const val OPEN_WEATHER_URL = "http://api.openweathermap.org/data/"
+        const val  OPEN_WEATHER_API = "26c1da7519547a4421ecbe0e165bba36"
+        const val UNIT = "metric"
+        var Location: LatLng? = null
     }
 }
