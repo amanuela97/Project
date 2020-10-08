@@ -2,7 +2,7 @@
 
 ---
 
-<img src="ScreenShots/Screenshot_1602014842.png" width="200" title="Main Screen">  <img src="ScreenShots/Screenshot_1602014960.png" width="200" title="Drawer">  <img src="ScreenShots/Screenshot_1602014974.png" width="200" title="Search Radius Activity">
+<img src="ScreenShots/Screenshot_1602014842.png" width="200" title="Main Screen">  <img src="ScreenShots/Screenshot_1602014960.png" width="200" title="Drawer">  <img src="ScreenShots/Screenshot_1602014974.png" width="200" title="Search Radius Activity">  <img src="ScreenShots/Screenshot_1602188407.png" width="200" title="Favourites Activity">
 
 ---
 
@@ -41,4 +41,4 @@ The app uses the following services:
 
 # Team
 
-- Amanuel Ayezabu and Nguyen Nguyen, student at Metropolia University of Applied Sciences, Finland
+- Amanuel Ayezabu and Nguyen Nguyen, students at Metropolia University of Applied Sciences, Finland
