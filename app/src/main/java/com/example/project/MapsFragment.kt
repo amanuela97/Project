@@ -29,6 +29,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -472,8 +473,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                                 place.rating,
                                 place.isOpen,
                                 place.phoneNumber,
-                                place.openingHours?.weekdayText,
-                                place.latLng
+                                place.openingHours?.weekdayText
                             )
                         }
                     }
@@ -499,10 +499,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                 )
             }
             places.forEach { place ->
-                if (place.name == marker.title && marker.title != getAddress(
-                        lastKnownLocation?.latitude,
-                        lastKnownLocation?.longitude
-                    )
+                if (
+                    place.geometry.location.lng == marker.position.longitude && place.geometry.location.lat == marker.position.latitude
                 ) {
                     Log.i(Constants.TAG, "here")
                     viewModel.getPlaceDetails(
@@ -543,7 +541,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         location: LatLng?
     ) {
         //get photo of restaurant and setText
-        getRestaurantImage(photoRef,name, address, openNow, phoneNumber, businessHours, location, rating)
+        getRestaurantImage(photoRef)
+        setTextValues(name, address, rating, openNow, phoneNumber, businessHours)
+        setUpFavoriteButton(name, businessHours, openNow, rating, phoneNumber, address, location)
     }
 
     @SuppressLint("SetTextI18n")
@@ -553,9 +553,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         rating: Double?,
         openNow: Boolean?,
         phoneNumber: String?,
-        businessHours: List<String>?,
-        img: Bitmap?,
-        location: LatLng?
+        businessHours: List<String>?
     ) {
         restaurant_name.text = name
         vicinity.text = "${getString(R.string.address)}  $address"
@@ -581,40 +579,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         phone_number.text = "${getString(R.string.phone)} ${phoneNumber ?: "-"}"
         restaurant_rating.text = "${getString(R.string.rating)} ${rating ?: "-"}"
         card.visibility = View.VISIBLE
-
-        button_fav.setOnClickListener {
-            button_fav.text = getString(R.string.add_to_favorites)
-            //convert bitmap to byteArray to store in DB
-            val stream = ByteArrayOutputStream()
-            img?.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            val byteArray = stream.toByteArray()
-            Log.i(Constants.TAG, "$img lll ")
-            val restaurant =  Restaurant(0,
-                name,
-                businessHours,
-                byteArray,
-                openNow,
-                rating,
-                phoneNumber,
-                address,
-                com.example.project.room_data.Location(location?.latitude, location?.longitude),
-            )
-            GlobalScope.launch(Dispatchers.IO){
-                restaurantModel.addFavRestaurant(restaurant)
-            }
-        }
     }
 
-    private fun getRestaurantImage(
-        photoRef: String?,
-        name: String?,
-        address: String?,
-        openNow: Boolean?,
-        phoneNumber: String?,
-        businessHours: List<String>?,
-        location: LatLng?,
-        rating: Double?
-    )  {
+    private fun getRestaurantImage(photoRef: String?)  {
+        if (photoRef == null) {
+            restaurant_img.setImageDrawable(null)
+            return
+        }
         var img: Bitmap?
         val client = OkHttpClient()
         val url =
@@ -639,11 +610,35 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                     Log.i(Constants.TAG, "$bitmap")
                     requireActivity().runOnUiThread {
                         restaurant_img.setImageBitmap(img)
-                        setTextValues(name, address, rating, openNow, phoneNumber, businessHours, img, location)
                     }
                 }
             }
         })
+    }
+
+    private fun setUpFavoriteButton(name: String?, businessHours: List<String>?, openNow: Boolean?, rating: Double?, phoneNumber: String?, address: String?, location: LatLng?) {
+        button_fav.setOnClickListener {
+            button_fav.text = getString(R.string.add_to_favorites)
+            //convert bitmap to byteArray to store in DB
+            val stream = ByteArrayOutputStream()
+            val img = restaurant_img.drawable.toBitmap()
+            img?.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val byteArray = stream.toByteArray()
+            Log.i(Constants.TAG, "$img lll ")
+            val restaurant =  Restaurant(0,
+                name,
+                businessHours,
+                byteArray,
+                openNow,
+                rating,
+                phoneNumber,
+                address,
+                com.example.project.room_data.Location(location?.latitude, location?.longitude),
+            )
+            GlobalScope.launch(Dispatchers.IO){
+                restaurantModel.addFavRestaurant(restaurant)
+            }
+        }
     }
 
     private fun getRestaurantImageWithMetaData(
@@ -653,8 +648,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
         rating: Double?,
         open: Boolean?,
         phoneNumber: String?,
-        weekdayText: MutableList<String>?,
-        latLng: LatLng?
+        weekdayText: MutableList<String>?
     ){
         // Create a FetchPhotoRequest.
         var img: Bitmap?
@@ -667,7 +661,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
                 requireActivity().runOnUiThread {
                     img = Bitmap.createScaledBitmap(bitmap, 600, 500, true)
                     restaurant_img.setImageBitmap(img)
-                    setTextValues(name, address, rating, open, phoneNumber, weekdayText, img, latLng)
+                    setTextValues(name, address, rating, open, phoneNumber, weekdayText)
                 }
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {
