@@ -29,15 +29,17 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="2dp"
-        android:visibility="invisible"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="25dp"
-        android:background="@drawable/rect"
         android:layout_alignParentBottom="true"
-        >
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@drawable/rect"
+        android:elevation="2dp"
+        android:visibility="invisible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,68 +54,76 @@
                 android:background="@drawable/rect"
                 android:contentDescription="@string/picture_of_the_restaurant"
                 android:elevation="2dp"
-                android:scaleType="fitXY"
-               />
+                android:scaleType="fitXY" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:elevation="2dp"
-                android:padding="5dp">
+                android:orientation="vertical"
+                android:padding="8dp">
 
                 <!-- Title, secondary and supporting text -->
                 <TextView
                     android:id="@+id/restaurant_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="25sp"
-                    android:background="@drawable/rect"
+                    android:layout_marginStart="12dp"
                     android:textAppearance="?attr/textAppearanceHeadline6"
-                    />
+                    android:textSize="20sp" />
+
                 <TextView
                     android:id="@+id/vicinity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textSize="20sp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="4dp"
                     android:textAppearance="?attr/textAppearanceBody2"
                     android:textColor="?android:attr/textColorSecondary"
-                    />
-                <TextView
-                    android:id="@+id/restaurant_opening_hours"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textSize="20sp"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="?android:attr/textColorSecondary"
-                    />
-                <Spinner
-                    android:id="@+id/weekday_text"
-                    android:layout_width="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="-8dp"
-                    android:layout_height="match_parent"/>
+                    android:textSize="16sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/restaurant_opening_hours"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="?attr/textAppearanceBody2"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp" />
+
+                    <Spinner
+                        android:id="@+id/weekday_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/phone_number"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textSize="20sp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="4dp"
                     android:textAppearance="?attr/textAppearanceBody2"
                     android:textColor="?android:attr/textColorSecondary"
-                    />
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/restaurant_rating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textSize="20sp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="4dp"
                     android:textAppearance="?attr/textAppearanceBody2"
                     android:textColor="?android:attr/textColorSecondary"
-                    />
+                    android:textSize="16sp" />
 
             </LinearLayout>
 
@@ -121,23 +131,32 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:padding="5dp"
-                android:orientation="horizontal">
+                android:id="@+id/linearLayout2">
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_fav"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:icon="@drawable/ic_baseline_favorite_24"
-                    android:layout_marginEnd="150dp"
                     style="?attr/borderlessButtonStyle"
-                    />
-                <Button
+                    tools:layout_conversion_absoluteHeight="48dp"
+                    tools:layout_editor_absoluteY="674dp"
+                    tools:layout_editor_absoluteX="9dp"
+                    tools:layout_conversion_absoluteWidth="88dp" />
+
+                <ImageButton
                     android:id="@+id/close_card"
+                    style="?attr/buttonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/ic_baseline_close_24"
-                    style="?attr/buttonStyle"
-                    />
+                    android:contentDescription="@string/close_button_description"
+                    android:src="@drawable/ic_baseline_close_24"
+                    tools:layout_conversion_absoluteHeight="48dp"
+                    tools:layout_conversion_absoluteWidth="88dp"
+                    tools:layout_editor_absoluteX="247dp"
+                    tools:layout_editor_absoluteY="674dp" />
 
             </LinearLayout>
 

@@ -621,7 +621,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, MaterialSearchBar.OnSearchA
             button_fav.text = getString(R.string.add_to_favorites)
             //convert bitmap to byteArray to store in DB
             val stream = ByteArrayOutputStream()
-            val img = restaurant_img.drawable.toBitmap()
+            val img = restaurant_img.drawable?.toBitmap()
             img?.compress(Bitmap.CompressFormat.PNG, 100, stream)
             val byteArray = stream.toByteArray()
             Log.i(Constants.TAG, "$img lll ")
