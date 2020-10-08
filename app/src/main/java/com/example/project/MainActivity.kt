@@ -2,18 +2,13 @@ package com.example.project
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.preference.PreferenceManager
-import com.example.project.utility.Constants
 import com.example.project.utility.GlobalObject
-import com.google.android.gms.maps.MapFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -27,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         //action bar for fragments
 //        setupActionBarWithNavController( findNavController(R.id.fragment))
+
         setUpSharedPreferences()
         setUpDrawer()
 
@@ -36,6 +32,10 @@ class MainActivity : AppCompatActivity() {
             when (it.itemId) {
                 R.id.search_radius -> {
                     navigateToSearchRadiusActivity()
+                    true
+                }
+                R.id.favourites ->{
+                    navigateToFavouritesActivity()
                     true
                 }
                 else -> false
@@ -78,7 +78,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigateToSearchRadiusActivity() {
         val intent = Intent(this, SearchRadiusActivity::class.java)
-        startActivityForResult(intent, SEARCH_RADIUS_INTENT);
+        startActivityForResult(intent, SEARCH_RADIUS_INTENT)
+    }
+
+    private fun navigateToFavouritesActivity() {
+        val intent = Intent(this, FavouritesActivity::class.java)
+        startActivity(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
