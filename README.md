@@ -2,7 +2,7 @@
 
 ---
 
-<img src="ScreenShots/Screenshot_1602014842.png" width="200" title="Main Screen">  <img src="ScreenShots/Screenshot_1602014960.png" width="200" title="Drawer">  <img src="ScreenShots/Screenshot_1602014974.png" width="200" title="Search Radius Activity">  <img src="ScreenShots/Screenshot_1602188407.png" width="200" title="Favourites Activity">
+<img src="ScreenShots/Screenshot_1602014842.png" width="200" title="Main Screen">  <img src="ScreenShots/Screenshot_1602014960.png" width="200" title="Drawer">  <img src="ScreenShots/Screenshot_1602014974.png" width="200" title="Search Radius Activity">  <img src="ScreenShots/Screenshot_1602188407.png" width="200" title="Favourites Activity"> ![Screenshot_20201009-143858_Let's Party](https://user-images.githubusercontent.com/44023180/95579552-8a54de80-0a3e-11eb-8fd4-edeadb5fe6c5.jpg)
 
 ---
 
